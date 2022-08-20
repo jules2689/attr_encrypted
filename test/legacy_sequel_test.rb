@@ -16,7 +16,7 @@ class LegacyHuman < Sequel::Model(:legacy_humans)
   self.attr_encrypted_options[:mode] = :single_iv_and_salt
 
   attr_encrypted :email, :key => 'a secret key', mode: :single_iv_and_salt
-  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
+  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.attr_encrypted_encrypt(:value => human.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
 
   def after_initialize(attrs = {})
     self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)

@@ -16,7 +16,7 @@ class LegacyClient
   property :salt, String
 
   attr_encrypted :email, :key => 'a secret key', mode: :single_iv_and_salt
-  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.encrypt(:value => client.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
+  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.attr_encrypted_encrypt(:value => client.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
 
   def initialize(attrs = {})
     super attrs

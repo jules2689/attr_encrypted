@@ -58,7 +58,7 @@ end
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
   attr_encrypted :email, key: SECRET_KEY
-  attr_encrypted :credentials, key: Proc.new { |user| Encryptor.encrypt(value: user.salt, key: SECRET_KEY, iv: user.key_iv) }, marshal: true
+  attr_encrypted :credentials, key: Proc.new { |user| Encryptor.attr_encrypted_encrypt(value: user.salt, key: SECRET_KEY, iv: user.key_iv) }, marshal: true
 
   after_initialize :initialize_salt_and_credentials
 
@@ -85,7 +85,7 @@ class Account < ActiveRecord::Base
   attr_encrypted :password, key: :password_encryption_key
 
   def encrypting?(attr)
-    encrypted_attributes[attr][:operation] == :encrypting
+    attr_encrypted_encrypted_attributes[attr][:operation] == :encrypting
   end
 
   def password_encryption_key
@@ -209,7 +209,7 @@ class ActiveRecordTest < Minitest::Test
     crypto_key = SecureRandom.urlsafe_base64(24)
     old_iv = SecureRandom.random_bytes(12)
     account = Account.create
-    encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
+    encrypted_value = Encryptor.attr_encrypted_encrypt(value: pw, iv: old_iv, key: crypto_key)
     Account.where(id: account.id).update_all(key: crypto_key, encrypted_password_iv: [old_iv].pack('m'), encrypted_password: [encrypted_value].pack('m'))
     account = Account.find(account.id)
     assert_equal pw, account.password
@@ -279,14 +279,14 @@ class ActiveRecordTest < Minitest::Test
     @person = PersonWithProcMode.create(email: 'test@example.com', credentials: 'password123')
 
     # Email is :per_attribute_iv_and_salt
-    assert_equal @person.class.encrypted_attributes[:email][:mode].class, Proc
-    assert_equal @person.class.encrypted_attributes[:email][:mode].call, :per_attribute_iv_and_salt
+    assert_equal @person.class.attr_encrypted_encrypted_attributes[:email][:mode].class, Proc
+    assert_equal @person.class.attr_encrypted_encrypted_attributes[:email][:mode].call, :per_attribute_iv_and_salt
     refute_nil @person.encrypted_email_salt
     refute_nil @person.encrypted_email_iv
 
     # Credentials is :single_iv_and_salt
-    assert_equal @person.class.encrypted_attributes[:credentials][:mode].class, Proc
-    assert_equal @person.class.encrypted_attributes[:credentials][:mode].call, :single_iv_and_salt
+    assert_equal @person.class.attr_encrypted_encrypted_attributes[:credentials][:mode].class, Proc
+    assert_equal @person.class.attr_encrypted_encrypted_attributes[:credentials][:mode].call, :single_iv_and_salt
     assert_nil @person.encrypted_credentials_salt
     assert_nil @person.encrypted_credentials_iv
   end

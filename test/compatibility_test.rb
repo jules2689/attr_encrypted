@@ -19,9 +19,9 @@ class CompatibilityTest < Minitest::Test
     self.attr_encrypted_options[:insecure_mode] = true
 
     attr_encrypted :nickname,
-      :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
+      :key => proc { Encryptor.attr_encrypted_encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
     attr_encrypted :birthdate,
-      :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
+      :key => proc { Encryptor.attr_encrypted_encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
   end
 
   class MarshallingPet < ActiveRecord::Base
@@ -35,10 +35,10 @@ class CompatibilityTest < Minitest::Test
     self.attr_encrypted_options[:insecure_mode] = true
 
     attr_encrypted :nickname,
-      :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
+      :key => proc { Encryptor.attr_encrypted_encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
       :marshal => true
     attr_encrypted :birthdate,
-      :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
+      :key => proc { Encryptor.attr_encrypted_encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
       :marshal => true
   end
 
